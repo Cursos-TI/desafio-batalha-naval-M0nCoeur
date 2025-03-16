@@ -1,16 +1,37 @@
 #include <stdio.h>
 
 // Jogo de Batalha Naval
-// 1. O jogo deve ter um tabuleiro 10x10
-// 2. O jogo deve ter 4 navios de tamanhos iguais a 3.
+// 1. O jogo possui formas representadas pelas habilidades especiais:
+//    - Cruz: Representada pela matriz com valor 1.
+//    - Cone: Representada pela matriz com valor 4.
+//    - Octaedro: Representada pela matriz com valor 5.
+// 2. O jogo possui 4 navios de tamanho 3.
 // 3. Os dois novos navios precisam estar na diagonal.
-// 4. As coordenadas dos navios são definidas diretamente no código, sem input do usuário.
-// 5. Não é necessário implementar a lógica do jogo (ataques, acertos, etc) neste nível.
-// 6. A validação de sobreposição de navios pode ser simplificada.
 // Lucas Ferreira
 
-int main() {
+// Função para sobrepor as áreas de efeito no tabuleiro
+void sobreporHabilidade(int habilidade[5][5], int origemX, int origemY, char valor, char tabuleiro[10][10]) {
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            int x = origemX - 2 + i;
+            int y = origemY - 2 + j;
+            if (x >= 0 && x < 10 && y >= 0 && y < 10 && habilidade[i][j] == 3) {
+                tabuleiro[x][y] = valor;
+            }
+        }
+    }
+}
 
+// Função para posicionar um navio no tabuleiro
+void posicionarNavio(int origemX, int origemY, int direcaoX, int direcaoY, char tabuleiro[10][10]) {
+    for (int i = 0; i < 3; i++) {
+        int x = origemX + i * direcaoX;
+        int y = origemY + i * direcaoY;
+        tabuleiro[x][y] = '3';  // Marca a posição do navio no tabuleiro
+    }
+}    
+
+int main() {
     // Tabuleiro 10x10
     char tabuleiro[10][10];
 
@@ -21,33 +42,43 @@ int main() {
         }
     }
 
-    // Função para verificar se a posição está disponível
-    int posicaoValida(int x, int y) {
-        return (x >= 0 && x < 10 && y >= 0 && y < 10 && tabuleiro[x][y] == '0');
-    }
+    // Definição das áreas de habilidade (Cruza, Cone, Octaedro)
+    // Cruz (valor 3)
+    int cruz[5][5] = {
+        {0, 0, 3, 0, 0},
+        {3, 3, 3, 3, 3},
+        {0, 0, 3, 0, 0}
+    };
+    // Cone (valor 3)
+    int cone[5][5] = {
+        {0, 0, 3, 0, 0},
+        {0, 3, 3, 3, 0},
+        {3, 3, 3, 3, 3}
+    };
+    // Octaedro (valor 3)
+    int octaedro[5][5] = {
+        {0, 0, 3, 0, 0},
+        {0, 3, 3, 3, 0},
+        {0, 0, 3, 0, 0}
+    };
 
-    // Função para posicionar um navio, verificando sobreposição
-    void posicionarNavio(int x, int y, int dx, int dy) {
-        for (int i = 0; i < 3; i++) {
-            if (!posicaoValida(x + i*dx, y + i*dy)) {
-                printf("Erro: Não é possível posicionar o navio na posição (%d, %d)\n", x + i*dx, y + i*dy);
-                return;
-            }
-            tabuleiro[x + i*dx][y + i*dy] = '3';
-        }
-    }
+    // Posicionamento das áreas de habilidades (com base no centro do tabuleiro)
+    // Cruz na posição (5,5)
+    sobreporHabilidade(cruz, 5, 5, '1', tabuleiro);
+    // Cone na posição (7,7)
+    sobreporHabilidade(cone, 7, 7, '4', tabuleiro);
+    // Octaedro na posição (3,3)
+    sobreporHabilidade(octaedro, 3, 3, '5', tabuleiro);
 
-    // Navio 1 - Horizontal (na linha 3, colunas D, E, F)
-    posicionarNavio(2, 3, 0, 1);
-
-    // Navio 2 - Vertical (na coluna G, linhas 6, 7, 8)
-    posicionarNavio(5, 6, 1, 0);
-
-    // Navio 3 - Diagonal (linhas 1, 2, 3, colunas 1, 2, 3)
-    posicionarNavio(0, 0, 1, 1);
-
-    // Navio 4 - Diagonal (linhas 4, 5, 6, colunas 4, 5, 6)
-    posicionarNavio(3, 3, 1, 1);
+    // Posicionamento dos navios
+    // Navio 1: Posição (0,0) na diagonal
+    posicionarNavio(0, 0, 1, 1, tabuleiro);
+    // Navio 2: Posição (9,0) na diagonal
+    posicionarNavio(9, 0, -1, 1, tabuleiro);
+    // Navio 3: Posição (0,9) na diagonal
+    posicionarNavio(0, 9, 1, -1, tabuleiro);
+    // Navio 4: Posição (9,9) na diagonal
+    posicionarNavio(9, 9, -1, -1, tabuleiro);
 
     // Imprime o cabeçalho das colunas
     printf("   A B C D E F G H I J\n");
